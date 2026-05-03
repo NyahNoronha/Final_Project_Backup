@@ -1,0 +1,36 @@
+---
+title: "Soil Conditions at HARV (2018)"
+author: "Nyah Noronha"
+format: html
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+# Introduction
+
+This study compares soil conditions between May and August 2018 at the HARV NEON site. These months represent wetter and drier seasonal conditions.
+
+# Methods
+
+```{r}
+soil_water <- read.csv("data/soil_water.csv")
+soil_temp <- read.csv("data/soil_temp.csv")
+soil_co2 <- read.csv("data/soil_co2.csv")
+```
+
+```{r}
+names(soil_water)
+names(soil_temp)
+names(soil_co2)
+```
+
+# Results
+
+```{r}
+soil_water %>%
+  ggplot(aes(x = VSWCMean)) +
+  geom_histogram()
+```

@@ -1,36 +1,168 @@
 ---
-title: "Soil Conditions at HARV (2018)"
+title: "Seasonal Differences in Soil Moisture, Temperature, and CO2 at HARV"
 author: "Nyah Noronha"
-format: html
+date: "April 26, 2026"
+bibliography: references.bib
+format:
+  html:
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
 ---
 
-```{r}
+```{r setup}
 library(dplyr)
 library(ggplot2)
 ```
 
 # Introduction
 
-This study compares soil conditions between May and August 2018 at the HARV NEON site. These months represent wetter and drier seasonal conditions.
+Soil processes play a critical role in regulating ecosystem dynamics, particularly through their influence on carbon cycling and nutrient availability. In forest ecosystems, soil temperature and moisture are key drivers of microbial activity, which can affect soil respiration and CO2 concentrations. Seasonal variation is especially important because spring and late summer conditions often differ in temperature, moisture, and biological activity.
+
+This study analyzed soil conditions at the **HARV NEON site** during 2018, focusing on differences between May and August. These months were selected to compare wetter spring conditions with drier late-summer conditions. Soil moisture, temperature, and CO2 were used as indicators of soil environmental conditions because they are closely connected to plant growth, microbial activity, and carbon cycling.
+
+This study analyzed how soil moisture, soil temperature, and soil CO2 concentrations varied between May and August. It was hypothesized that **soil temperature and CO2** would show greater variability than soil moisture because temperature and biological activity often change strongly between spring and summer.
+
+Soil respiration and CO2 flux are influenced by both biological activity and environmental conditions such as temperature and oxygen availability [@angert2015using]. Long-term ecosystem studies at Harvard Forest have also shown that carbon exchange varies across multiple timescales and is strongly affected by seasonal and climatic factors [@urbanski2007factors; @finzi2020carbon].
+
+Previous research has demonstrated that soil temperature and moisture strongly influence soil respiration and microbial activity in forest ecosystems [@bowden2004chronic; @giasson2013soil; @londo1999forest]. Seasonal and interannual variation in soil CO2 flux has also been widely documented, with temperature and environmental conditions acting as primary controls [@phillips2010interannual; @savage2001interannual].
 
 # Methods
 
-```{r}
+I used the ggplot2 package [@ggplot2] in R to do my visualizations.
+
+## Site Location and Description
+
+The HARV NEON site is located at Harvard Forest. This analysis focused on soil measurements collected during May and August 2018. These months were used to compare seasonal soil conditions within the same year.
+
+## Field Sampling Design
+
+Soil data were collected by NEON using standardized sampling protocols across the Harvard Forest site. Measurements of soil moisture, soil temperature, and soil CO2 concentration were recorded at regular intervals to capture temporal variation in soil conditions.
+
+## Data Analysis and Visualization
+
+Data were obtained from NEON soil datasets [@neon_soil_temp; @neon_soil_co2; @neon_soil_water]. Soil moisture (`VSWCMean`), soil temperature (`soilTempMean`), and soil CO2 concentration (`soilCO2concentrationMean`) were selected for analysis. Observations with missing or non-finite values were excluded from the visual analysis. Histograms and boxplots were used to compare the distribution of each variable between May and August 2018.
+
+```{r load-data}
 soil_water <- read.csv("data/soil_water.csv")
 soil_temp <- read.csv("data/soil_temp.csv")
 soil_co2 <- read.csv("data/soil_co2.csv")
-```
 
-```{r}
-names(soil_water)
-names(soil_temp)
-names(soil_co2)
+soil_water$month <- format(as.Date(soil_water$startDateTime), "%m")
+soil_temp$month <- format(as.Date(soil_temp$startDateTime), "%m")
+soil_co2$month <- format(as.Date(soil_co2$startDateTime), "%m")
+
+soil_water <- soil_water %>% filter(month %in% c("05", "08"))
+soil_temp <- soil_temp %>% filter(month %in% c("05", "08"))
+soil_co2 <- soil_co2 %>% filter(month %in% c("05", "08"))
+
+soil_water$month <- recode(soil_water$month, "05" = "May", "08" = "August")
+soil_temp$month <- recode(soil_temp$month, "05" = "May", "08" = "August")
+soil_co2$month <- recode(soil_co2$month, "05" = "May", "08" = "August")
 ```
 
 # Results
 
-```{r}
+Soil moisture values were tightly clustered with a narrow range between approximately 0.40 and 0.45, indicating relatively stable conditions across observations. In contrast, soil temperature displayed a broader distribution, with values spanning a wider range between May and August. Soil CO2 concentrations also showed substantial variability, with values distributed across a large range. August values showed higher variability in soil temperature and CO2 compared to May. These patterns indicate clear seasonal differences between May and August, with August showing greater variability in soil temperature and CO2. Soil moisture showed minimal seasonal change compared to temperature and CO2.
+
+# Discussion
+
+The results supported the hypothesis that soil temperature and CO2 showed greater variability than soil moisture. Soil moisture remained relatively stable compared to the other variables, while temperature and CO2 showed broader distributions. This pattern suggests that seasonal changes in temperature and biological activity may contribute more strongly to short-term changes in soil conditions than soil moisture alone.
+
+One limitation of this analysis is that it focused only on May and August 2018. Additional years would make it easier to determine whether these patterns were consistent over time. Future work could compare multiple years and include additional soil chemistry variables to better understand how water availability, temperature, and carbon cycling interact at the HARV site.
+
+These results highlight the importance of seasonal variability in regulating soil processes. Differences between May and August suggest that temperature-driven biological activity plays a key role in shaping soil CO2 dynamics at this site. These results are consistent with long-term studies at Harvard Forest showing that soil carbon dynamics and CO2 exchange are strongly influenced by environmental variability and seasonal change [@finzi2020carbon; @urbanski2007factors].
+
+These findings are important for understanding how environmental variability influences soil processes in forest ecosystems. Seasonal differences in temperature and biological activity can have significant impacts on carbon cycling, which plays a key role in regulating atmospheric CO2 levels. Understanding these relationships is especially important in the context of climate change, where shifts in temperature and precipitation patterns may alter soil processes and ecosystem function. Continued monitoring and analysis of long-term datasets such as those provided by NEON will be essential for predicting how ecosystems respond to environmental change.
+
+# Figures
+
+## Soil Water
+
+```{r soil-water-histogram}
 soil_water %>%
-  ggplot(aes(x = VSWCMean)) +
-  geom_histogram()
+  ggplot(aes(x = VSWCMean, fill = month)) +
+  geom_histogram(bins = 30, alpha = 0.6, position = "identity") +
+  labs(title = "Soil Moisture Distribution: May vs August",
+       x = "Soil Moisture (VSWCMean)",
+       y = "Count",
+       fill = "Month")
 ```
+
+**Figure 1:** Soil moisture values were concentrated between 0.40 and 0.45, indicating relatively stable moisture conditions.
+
+```{r soil-water-boxplot}
+soil_water %>%
+  ggplot(aes(x = month, y = VSWCMean, fill = month)) +
+  geom_boxplot() +
+  labs(title = "Soil Moisture by Month",
+       x = "Month",
+       y = "Soil Moisture (VSWCMean)",
+       fill = "Month")
+```
+
+**Figure 2:** Soil moisture values were compared between May and August to evaluate seasonal differences.
+
+## Soil Temperature
+
+```{r soil-temperature-histogram}
+soil_temp %>%
+  ggplot(aes(x = soilTempMean, fill = month)) +
+  geom_histogram(bins = 30, alpha = 0.6, position = "identity") +
+  labs(title = "Soil Temperature Distribution: May vs August",
+       x = "Soil Temperature (°C)",
+       y = "Count",
+       fill = "Month")
+```
+
+**Figure 3:** Soil temperature showed a wider distribution than soil moisture, reflecting variation across observations.
+
+```{r soil-temperature-boxplot}
+soil_temp %>%
+  ggplot(aes(x = month, y = soilTempMean, fill = month)) +
+  geom_boxplot() +
+  labs(title = "Soil Temperature by Month",
+       x = "Month",
+       y = "Soil Temperature (°C)",
+       fill = "Month")
+```
+
+**Figure 4:** Soil temperature differed between May and August, showing seasonal change in soil conditions.
+
+## Soil CO2
+
+```{r soil-co2-histogram}
+soil_co2 %>%
+  ggplot(aes(x = soilCO2concentrationMean, fill = month)) +
+  geom_histogram(bins = 30, alpha = 0.6, position = "identity") +
+  labs(title = "Soil CO2 Concentration Distribution: May vs August",
+       x = "Soil CO2 Concentration",
+       y = "Count",
+       fill = "Month")
+```
+
+**Figure 5:** Soil CO2 concentrations varied widely, indicating differences in soil respiration activity.
+
+```{r soil-co2-boxplot}
+soil_co2 %>%
+  ggplot(aes(x = month, y = soilCO2concentrationMean, fill = month)) +
+  geom_boxplot() +
+  labs(title = "Soil CO2 Concentration by Month",
+       x = "Month",
+       y = "Soil CO2 Concentration",
+       fill = "Month")
+```
+
+**Figure 6:** Soil CO2 concentrations were compared between May and August to examine seasonal variation in soil respiration.
+
+# Acknowledgments
+
+ChatGPT was used to help troubleshoot R code, organize the Quarto report structure, and debug GitHub submission issues. The analysis, dataset choices, and final interpretation were reviewed and edited by the author.
+
+# Conclusion
+
+Soil moisture remained relatively stable compared to soil temperature and CO2, which showed greater variability. These results suggest that temperature and biological processes contribute more strongly to changes in soil conditions than moisture alone.
+
+# Sources Cited
